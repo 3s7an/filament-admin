@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductResource\Pages;
@@ -7,6 +6,7 @@ use App\Models\Category;
 use App\Models\Product;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Illuminate\Database\Eloquent\Collection;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -98,7 +98,19 @@ class ProductResource extends Resource
         Tables\Actions\DeleteAction::make(),
       ])
       ->bulkActions([
-        Tables\Actions\DeleteBulkAction::make(),
+        Tables\Actions\BulkActionGroup::make([
+          Tables\Actions\DeleteBulkAction::make(),
+          Tables\Actions\BulkAction::make('activate')
+              ->label('Aktivovať')
+              ->action(fn (Collection $records) => $records->each->update(['is_active' => true]))
+              ->requiresConfirmation()
+              ->color('success'),
+          Tables\Actions\BulkAction::make('deactivate')
+              ->label('Deaktivovať')
+              ->action(fn (Collection $records) => $records->each->update(['is_active' => false]))
+              ->requiresConfirmation()
+              ->color('danger'),
+      ]),
       ]);
   }
 
